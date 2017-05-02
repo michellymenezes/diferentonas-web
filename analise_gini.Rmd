@@ -1,0 +1,87 @@
+---
+title: "Convênios X Fornecedores"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(reldist)
+library(readr)
+library(ggplot2)
+source("trata_dados.R")
+
+pagamentos_siconv = cria_pagamentos_sincov()
+cidade_convenio = cria_cidade_convenio(pagamentos_siconv)
+cidade_fornecedor = cria_cidade_fornecedor(pagamentos_siconv)
+cidade_resumo = cria_cidade_resumo(cidade_fornecedor, cidade_convenio)
+ginicities = cria_ginicities(cidade_fornecedor, cidade_convenio)
+```
+
+#### Objetivo: 
+
+**identificar cidades que apresentam maiores diferenças de valores ditribuídos entre convênnios e fornecedores.**
+
+#### Como? 
+
+**Utilizamos a função gini. O valor gini aumenta de acordo com a distribuição de valores. Quanto mais igualitária a distribuição, mais baixo será o valor gini.**
+
+**Exemplo:**
+
+O valor 100 está concentrado em 50% das partes no primeiro grupo e em 25% das partes no segundo grupo. Logo, o valor gini será maior no segundo grupo, já que uma pequena parte do grupo concentra um valor muito diferente das outras partes. Quanto menor uma parte representar de um todo e quanto maior e destoante o valor armazenado por essa pequena parte, maior será o gini.
+```{r}
+gini(c(100, 1))
+```
+
+```{r}
+gini(c(100, 1, 1, 1))
+```
+
+Note que o valor gini não se cresce muito se apenas um valor aumentar, mas a parte que ele representa permenecer a mesma.
+
+```{r}
+gini(c(1000, 1))
+```
+
+#### Os dados
+
+Calculamos dois valores ginis para cada cidade a partir de duas variáveis diferentes. Uma é o valor que um convênio recebe de uma cidade e outra de o valor que um fornecedor recebe de uma cidade. Assim como no exemplo acima, com esses dois valores podemos ver, para cada cidade, como se comporta a distribuição de verba para convênios e fornecedores.
+
+Tendo esses dois valores, para cada cidade, calculamos um coeficiente que se dá pela seguinte função:
+
+```coef = gini_forncedor/gini_convenio```
+
+Se esse coeficiente atinge altos valores, possivelmente há uma diferença significante ao comparar a ditribuição de verba entre forncecedores e entre convênios, sendo a distribuição entre fornecedores muito mais desigual e concentrada.
+
+```{r}
+ggplot(ginicities, aes(gini_valor_convenio, gini_valor_fornecedor)) + geom_point(alpha=0.1) + 
+    geom_smooth(alpha=0.25, color="black", fill="black") 
+```
+Selecinamos então as 3 primeiras cidades com maiores coeficientes para tentar entender por que apresentam esses valores.
+
+```{r}
+ginicities[with(ginicities, order(-coef))[1:5], ]
+```
+### Sobralia
+
+```{r}
+ggplot(subset(pagamentos_siconv, MUNIC_PROPONENTE == "SOBRALIA"), aes(y=VL_PAGO, x=as.factor(NR_CONVENIO), fill = as.factor(IDENTIF_FORNECEDOR))) + geom_bar(stat="identity")
+
+ggplot(subset(pagamentos_siconv, MUNIC_PROPONENTE == "SOBRALIA"), aes(y=VL_PAGO, x=as.factor(IDENTIF_FORNECEDOR), fill = as.factor(NR_CONVENIO))) + geom_bar(stat="identity")
+```
+
+### Ibicoara
+
+```{r}
+ggplot(subset(pagamentos_siconv, MUNIC_PROPONENTE == "IBICOARA"), aes(y=VL_PAGO, x=as.factor(NR_CONVENIO), fill = as.factor(IDENTIF_FORNECEDOR))) + geom_bar(stat="identity")
+
+ggplot(subset(pagamentos_siconv, MUNIC_PROPONENTE == "IBICOARA"), aes(y=VL_PAGO, x=as.factor(IDENTIF_FORNECEDOR), fill = as.factor(NR_CONVENIO))) + geom_bar(stat="identity")
+```
+
+### Morro do Chapeu do Piaui
+
+```{r}
+ggplot(subset(pagamentos_siconv, MUNIC_PROPONENTE == "MORRO DO CHAPEU DO PIAUI"), aes(y=VL_PAGO, x=as.factor(NR_CONVENIO), fill = as.factor(IDENTIF_FORNECEDOR))) + geom_bar(stat="identity")
+
+ggplot(subset(pagamentos_siconv, MUNIC_PROPONENTE == "MORRO DO CHAPEU DO PIAUI"), aes(y=VL_PAGO, x=as.factor(IDENTIF_FORNECEDOR), fill = as.factor(NR_CONVENIO))) + geom_bar(stat="identity")
+```

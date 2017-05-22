@@ -97,13 +97,13 @@ shinyServer(function(input, output, session) {
     plot_convenios = plot_ly(pagamentos_siconv %>%
                                filter(MUNIC_PROPONENTE == cidades_semelhantes[1],
                                       UF_PROPONENTE == input$selectEstado),
-                             x = ~as.factor(IDENTIF_FORNECEDOR),
+                             x = ~as.factor(NR_CONVENIO),
                              y = ~VL_PAGO,
                              type = "bar",
-                             color = ~as.factor(NR_CONVENIO),
+                             color = ~as.factor(IDENTIF_FORNECEDOR),
                              colors = "RdPu") %>%
                     layout(barmode = 'stack',
-                           title = paste("Perspectiva Fornecedor - ", cidades_semelhantes[1]),
+                           title = paste("Perspectiva Convênio - ", cidades_semelhantes[1]),
                            yaxis = list(title = "Total Pago"),
                            xaxis = list(title = "Convênios"))
     
@@ -128,13 +128,13 @@ shinyServer(function(input, output, session) {
     plot_convenios = plot_ly(pagamentos_siconv %>%
                                filter(MUNIC_PROPONENTE == cidades_semelhantes[2],
                                       UF_PROPONENTE == input$selectEstado),
-                             x = ~as.factor(IDENTIF_FORNECEDOR),
+                             x = ~as.factor(NR_CONVENIO),
                              y = ~VL_PAGO,
                              type = "bar",
-                             color = ~as.factor(NR_CONVENIO),
+                             color = ~as.factor(IDENTIF_FORNECEDOR),
                              colors = "RdPu") %>%
       layout(barmode = 'stack',
-             title = paste("Perspectiva Fornecedor - ", cidades_semelhantes[2]),
+             title = paste("Perspectiva Convênio - ", cidades_semelhantes[2]),
              yaxis = list(title = "Total Pago"),
              xaxis = list(title = "Convênios"))
     
@@ -159,13 +159,13 @@ shinyServer(function(input, output, session) {
     plot_convenios = plot_ly(pagamentos_siconv %>%
                                filter(MUNIC_PROPONENTE == cidades_semelhantes[3],
                                       UF_PROPONENTE == input$selectEstado),
-                             x = ~as.factor(IDENTIF_FORNECEDOR),
+                             x = ~as.factor(NR_CONVENIO),
                              y = ~VL_PAGO,
                              type = "bar",
-                             color = ~as.factor(NR_CONVENIO),
+                             color = ~as.factor(IDENTIF_FORNECEDOR),
                              colors = "RdPu") %>%
       layout(barmode = 'stack',
-             title = paste("Perspectiva Fornecedor - ", cidades_semelhantes[3]),
+             title = paste("Perspectiva Convênio - ", cidades_semelhantes[3]),
              yaxis = list(title = "Total Pago"),
              xaxis = list(title = "Convênios"))
     
@@ -190,13 +190,13 @@ shinyServer(function(input, output, session) {
     plot_convenios = plot_ly(pagamentos_siconv %>%
                                filter(MUNIC_PROPONENTE == cidades_semelhantes[1],
                                       UF_PROPONENTE == input$selectEstado),
-                             x = ~as.factor(NR_CONVENIO),
+                             x = ~as.factor(IDENTIF_FORNECEDOR),
                              y = ~VL_PAGO,
                              type = "bar",
-                             color = ~as.factor(IDENTIF_FORNECEDOR),
+                             color = ~as.factor(NR_CONVENIO),
                              colors = "YlGnBu") %>%
                     layout(barmode = 'stack',
-                           title = paste("Perspectiva Convênio - ", cidades_semelhantes[1]),
+                           title = paste("Perspectiva Fornecedor - ", cidades_semelhantes[1]),
                            yaxis = list(title = "Total Pago"),
                            xaxis = list(title = "Fornecedores"))
   })
@@ -220,13 +220,13 @@ shinyServer(function(input, output, session) {
     plot_convenios = plot_ly(pagamentos_siconv %>%
                                filter(MUNIC_PROPONENTE == cidades_semelhantes[2],
                                       UF_PROPONENTE == input$selectEstado),
-                             x = ~as.factor(NR_CONVENIO),
+                             x = ~as.factor(IDENTIF_FORNECEDOR),
                              y = ~VL_PAGO,
                              type = "bar",
-                             color = ~as.factor(IDENTIF_FORNECEDOR),
+                             color = ~as.factor(NR_CONVENIO),
                              colors = "YlGnBu") %>%
       layout(barmode = 'stack',
-             title = paste("Perspectiva Convênio - ", cidades_semelhantes[2]),
+             title = paste("Perspectiva Fornecedor - ", cidades_semelhantes[2]),
              yaxis = list(title = "Total Pago"),
              xaxis = list(title = "Fornecedores"))
   })
@@ -250,13 +250,13 @@ shinyServer(function(input, output, session) {
     plot_convenios = plot_ly(pagamentos_siconv %>%
                                filter(MUNIC_PROPONENTE == cidades_semelhantes[3],
                                       UF_PROPONENTE == input$selectEstado),
-                             x = ~as.factor(NR_CONVENIO),
+                             x = ~as.factor(IDENTIF_FORNECEDOR),
                              y = ~VL_PAGO,
                              type = "bar",
-                             color = ~as.factor(IDENTIF_FORNECEDOR),
+                             color = ~as.factor(NR_CONVENIO),
                              colors = "YlGnBu") %>%
       layout(barmode = 'stack',
-             title = paste("Perspectiva Convênio - ", cidades_semelhantes[3]),
+             title = paste("Perspectiva Fornecedor - ", cidades_semelhantes[3]),
              yaxis = list(title = "Total Pago"),
              xaxis = list(title = "Fornecedores"))
   })

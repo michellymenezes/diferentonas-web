@@ -11,13 +11,14 @@ ginicities = read_csv("data/ginicities_5.csv")
 pagamentos_siconv = read_csv("data/pagamentos_sincov.csv")
 cidade_resumo = read_csv("data/cidade_resumo_5.csv")
 
+
 ui <- dashboardPage( skin= "purple",
   dashboardHeader(title = "As diferentonas - As Supercontratadas", titleWidth = 400),
   dashboardSidebar(
     sidebarMenu(id = "myMenu",
                 menuItem("Introdução", tabName = "info", icon = icon("info-circle")),
                 menuItem("Sua cidade", tabName = "user", icon = icon("bar-chart-o"))),
-    conditionalPanel(condition = "input.myMenu == 'user'",
+    conditionalPanel(condition = "input.myMenu == 'user' && input.panel2 == 1",
                      selectInput("selectEstado", "Estado:", choices = unique(ginicities %>%
                                                                                select(UF))),
                      selectInput("selectCidade", "Cidade:", choices = ginicities %>%
@@ -71,17 +72,17 @@ ui <- dashboardPage( skin= "purple",
                       )
                     ),
                   fluidRow(
-                    infoBox(width = 4, "Abaíra", "XX.xx%", icon = icon("percent"), color = "teal"),
-                    infoBox(width = 4, "Maiquinique", "XX.xx%", icon = icon("percent"), color = "teal"),
-                    infoBox(width = 4, "Planaltino", "XX.xx%", icon = icon("percent"), color = "teal")
+                    infoBox(width = 4, "Abaíra", "286.5911%", icon = icon("percent"), color = "teal"),
+                    infoBox(width = 4, "Maiquinique", "73.60089%", icon = icon("percent"), color = "teal"),
+                    infoBox(width = 4, "Planaltino", "211.9592%", icon = icon("percent"), color = "teal")
                     ),
                   fluidRow(
                     box(width = 12,
-                             #      h3("Cidade Semelhantes"),
-                           DT::dataTableOutput("cidadesSemelhantes")
-                                   )
-                  )
-                ),
+                        h3("Cidade Semelhantes"),
+                        DT::dataTableOutput("cidadesSemelhantes")
+                        )
+                    )
+                  ),
                 conditionalPanel(
                   condition = "input.panel == 2",
                   fluidRow(
@@ -104,6 +105,14 @@ ui <- dashboardPage( skin= "purple",
                   fluidRow(
                     box(plotlyOutput("plotConveniosTut1")),
                     box(plotlyOutput("plotFornecedoresTut1"))
+                  ),
+                  fluidRow(
+                    box(plotlyOutput("plotConveniosTut2")),
+                    box(plotlyOutput("plotFornecedoresTut2"))
+                  ),
+                  fluidRow(
+                    box(plotlyOutput("plotConveniosTut3")),
+                    box(plotlyOutput("plotFornecedoresTut3"))
                   )
                 ),
                 conditionalPanel(
@@ -136,11 +145,39 @@ ui <- dashboardPage( skin= "purple",
                   selectInput(inputId ="panel2", label = "panel2", selected = 1, choices = c(1,2,3))
                 ),
                 conditionalPanel(
+                  condition = "input.panel2 == 1",
+                  fluidRow(
+                    infoBoxOutput("giniBox1"),
+                    infoBoxOutput("giniBox2"),
+                    infoBoxOutput("giniBox3")
+                  ),
+                  fluidRow(
+                    box(width = 12,
+                        h3("Cidade Semelhantes"),
+                        DT::dataTableOutput("cidadesSemelhantes2")
+                    )
+                  )
+                ),
+                conditionalPanel(
                   condition = "input.panel2 == 2",
                   fluidRow(
-                    box(plotlyOutput("plotConvenios1")),
-                    box(plotlyOutput("plotFornecedores1"))
+                    box(plotlyOutput("plotConvenios11")),
+                    box(plotlyOutput("plotFornecedores11"))
+                  ),
+                  fluidRow(
+                    box(plotlyOutput("plotConvenios12")),
+                    box(plotlyOutput("plotFornecedores12"))
+                  ),
+                  fluidRow(
+                    box(plotlyOutput("plotConvenios13")),
+                    box(plotlyOutput("plotFornecedores13"))
                   )
+                ),
+                conditionalPanel(
+                  condition = "input.panel2 == 3",
+                  fluidRow( column(width = 12,
+                                   DT::dataTableOutput("plotTabela2")
+                  ))
                 )
               )
       )
@@ -150,6 +187,20 @@ ui <- dashboardPage( skin= "purple",
 
 server <- function(input, output, session) {
   
+  observe({
+    
+    updateSelectInput(session, "selectCidade",
+                      choices = ginicities %>%
+                        filter(UF == input$selectEstado) %>%
+                        select(cidade))
+    
+
+    
+  })
+  
+
+  
+  #######################################################
   
   output$cidadesSemelhantes <- DT::renderDataTable({
     
@@ -209,12 +260,78 @@ server <- function(input, output, session) {
              xaxis = list(title = "Fornecedores"))
   })
   
+  output$plotConveniosTut2 <- renderPlotly({
+    plot_convenios = plot_ly(pagamentos_siconv %>%
+                               filter(MUNIC_PROPONENTE == "MAIQUINIQUE",
+                                      UF_PROPONENTE == "BA"),
+                             x = ~as.factor(NR_CONVENIO),
+                             y = ~VL_PAGO,
+                             type = "bar",
+                             color = ~as.factor(IDENTIF_FORNECEDOR),
+                             colors = "RdPu",
+                             text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
+      layout(barmode = 'stack',
+             title = paste("Perspectiva Convênio - MAIQUINIQUE"),
+             yaxis = list(title = "Total Pago"),
+             xaxis = list(title = "Convênios"))
+  })
+  
+  output$plotFornecedoresTut2 <- renderPlotly({
+    
+    plot_convenios = plot_ly(pagamentos_siconv %>%
+                               filter(MUNIC_PROPONENTE == "MAIQUINIQUE",
+                                      UF_PROPONENTE == "BA"),
+                             x = ~as.factor(IDENTIF_FORNECEDOR),
+                             y = ~VL_PAGO,
+                             type = "bar",
+                             color = ~as.factor(NR_CONVENIO),
+                             colors = "YlGnBu",
+                             text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
+      layout(barmode = 'stack',
+             title = paste("Perspectiva Fornecedor - MAIQUINIQUE"),
+             yaxis = list(title = "Total Pago"),
+             xaxis = list(title = "Fornecedores"))
+  })
+  
+  output$plotConveniosTut3 <- renderPlotly({
+    plot_convenios = plot_ly(pagamentos_siconv %>%
+                               filter(MUNIC_PROPONENTE == "PLANALTINO",
+                                      UF_PROPONENTE == "BA"),
+                             x = ~as.factor(NR_CONVENIO),
+                             y = ~VL_PAGO,
+                             type = "bar",
+                             color = ~as.factor(IDENTIF_FORNECEDOR),
+                             colors = "RdPu",
+                             text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
+      layout(barmode = 'stack',
+             title = paste("Perspectiva Convênio - PLANALTINO"),
+             yaxis = list(title = "Total Pago"),
+             xaxis = list(title = "Convênios"))
+  })
+  
+  output$plotFornecedoresTut3 <- renderPlotly({
+    
+    plot_convenios = plot_ly(pagamentos_siconv %>%
+                               filter(MUNIC_PROPONENTE == "PLANALTINO",
+                                      UF_PROPONENTE == "BA"),
+                             x = ~as.factor(IDENTIF_FORNECEDOR),
+                             y = ~VL_PAGO,
+                             type = "bar",
+                             color = ~as.factor(NR_CONVENIO),
+                             colors = "YlGnBu",
+                             text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
+      layout(barmode = 'stack',
+             title = paste("Perspectiva Fornecedor - PLANALTINO"),
+             yaxis = list(title = "Total Pago"),
+             xaxis = list(title = "Fornecedores"))
+  })
   
   output$plotTabelaTut <- DT::renderDataTable({
     
     tabela_resultante = pagamentos_siconv %>%
       filter(MUNIC_PROPONENTE %in% c("ABAIRA", "MAIQUINIQUE", "PLANALTINO"),
              UF_PROPONENTE == "BA") %>%
+      filter(NR_CONVENIO %in% cidade_convenio$NR_CONVENIO)%>%
       select(MUNIC_PROPONENTE,
              UF_PROPONENTE,
              IDENTIF_FORNECEDOR,
@@ -306,7 +423,192 @@ server <- function(input, output, session) {
              xaxis = list(title = "Fornecedores"))
   })
   
+##################################################
   
+  output$cidadesSemelhantes2 <- DT::renderDataTable({
+    
+    cidadesEstado = cidade_resumo %>%
+      filter(UF_PROPONENTE == input$selectEstado)
+    
+    cidadesEstado$dist = dist(rbind(cidadesEstado %>%
+                                      filter(MUNIC_PROPONENTE == input$selectCidade) %>%
+                                      select(pop),
+                                    cidadesEstado %>%
+                                      select(pop)))[1:NROW(cidadesEstado)]
+    cidades_semelhantes = (cidadesEstado %>%
+                             arrange(dist) %>%
+                             slice(1:3))$MUNIC_PROPONENTE
+    
+    tabela_resultante = cidade_resumo %>%
+      filter(MUNIC_PROPONENTE %in% cidades_semelhantes,
+             UF_PROPONENTE == input$selectEstado)
+    
+    output$giniBox1 <- renderInfoBox({
+      munic = cidades_semelhantes[1]
+      infoBox(width = 4, 
+              munic, 
+              paste((ginicities %>% filter(cidade == munic))$coef * 100, "%" ), 
+              icon = icon("percent"),
+              color = "teal")
+    })
+    
+    
+    output$giniBox2 <- renderInfoBox({
+      munic = cidades_semelhantes[2]
+      infoBox(width = 4, 
+            munic, 
+            paste((ginicities %>% filter(cidade == munic))$coef * 100, "%" ), 
+            icon = icon("percent"),
+            color = "teal")
+    })
+  
+    output$giniBox3 <- renderInfoBox({
+      munic = cidades_semelhantes[3]
+      infoBox(width = 4, 
+            munic, 
+            paste((ginicities %>% filter(cidade == munic))$coef * 100, "%" ), 
+            icon = icon("percent"),
+            color = "teal")
+    })
+    
+    output$plotConvenios11 <- renderPlotly({
+      
+      plot_convenios = plot_ly(pagamentos_siconv %>%
+                                 filter(MUNIC_PROPONENTE == cidades_semelhantes[1],
+                                        UF_PROPONENTE == input$selectEstado),
+                               x = ~as.factor(NR_CONVENIO),
+                               y = ~VL_PAGO,
+                               type = "bar",
+                               color = ~as.factor(IDENTIF_FORNECEDOR),
+                               colors = "RdPu",
+                               text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
+        layout(barmode = 'stack',
+               title = paste("Perspectiva Convênio - ", cidades_semelhantes[1]),
+               yaxis = list(title = "Total Pago"),
+               xaxis = list(title = "Convênios"))
+    })
+    
+    output$plotConvenios12 <- renderPlotly({
+      
+      plot_convenios = plot_ly(pagamentos_siconv %>%
+                                 filter(MUNIC_PROPONENTE == cidades_semelhantes[2],
+                                        UF_PROPONENTE == input$selectEstado),
+                               x = ~as.factor(NR_CONVENIO),
+                               y = ~VL_PAGO,
+                               type = "bar",
+                               color = ~as.factor(IDENTIF_FORNECEDOR),
+                               colors = "RdPu",
+                               text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
+        layout(barmode = 'stack',
+               title = paste("Perspectiva Convênio - ", cidades_semelhantes[2]),
+               yaxis = list(title = "Total Pago"),
+               xaxis = list(title = "Convênios"))
+    })
+    
+    output$plotConvenios13 <- renderPlotly({
+      
+      plot_convenios = plot_ly(pagamentos_siconv %>%
+                                 filter(MUNIC_PROPONENTE == cidades_semelhantes[3],
+                                        UF_PROPONENTE == input$selectEstado),
+                               x = ~as.factor(NR_CONVENIO),
+                               y = ~VL_PAGO,
+                               type = "bar",
+                               color = ~as.factor(IDENTIF_FORNECEDOR),
+                               colors = "RdPu",
+                               text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
+        layout(barmode = 'stack',
+               title = paste("Perspectiva Convênio - ", cidades_semelhantes[3]),
+               yaxis = list(title = "Total Pago"),
+               xaxis = list(title = "Convênios"))
+    })
+    
+    output$plotFornecedores11 <- renderPlotly({
+      
+      plot_convenios = plot_ly(pagamentos_siconv %>%
+                                 filter(MUNIC_PROPONENTE == cidades_semelhantes[1],
+                                        UF_PROPONENTE == input$selectEstado),
+                               x = ~as.factor(IDENTIF_FORNECEDOR),
+                               y = ~VL_PAGO,
+                               type = "bar",
+                               color = ~as.factor(NR_CONVENIO),
+                               colors = "YlGnBu",
+                               text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
+        layout(barmode = 'stack',
+               title = paste("Perspectiva Fornecedor - ", cidades_semelhantes[1]),
+               yaxis = list(title = "Total Pago"),
+               xaxis = list(title = "Fornecedores"))
+    })
+    
+    output$plotFornecedores12 <- renderPlotly({
+      
+      plot_convenios = plot_ly(pagamentos_siconv %>%
+                                 filter(MUNIC_PROPONENTE == cidades_semelhantes[2],
+                                        UF_PROPONENTE == input$selectEstado),
+                               x = ~as.factor(IDENTIF_FORNECEDOR),
+                               y = ~VL_PAGO,
+                               type = "bar",
+                               color = ~as.factor(NR_CONVENIO),
+                               colors = "YlGnBu",
+                               text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
+        layout(barmode = 'stack',
+               title = paste("Perspectiva Fornecedor - ", cidades_semelhantes[2]),
+               yaxis = list(title = "Total Pago"),
+               xaxis = list(title = "Fornecedores"))
+    })
+    
+    output$plotFornecedores13 <- renderPlotly({
+      
+      plot_convenios = plot_ly(pagamentos_siconv %>%
+                                 filter(MUNIC_PROPONENTE == cidades_semelhantes[3],
+                                        UF_PROPONENTE == input$selectEstado),
+                               x = ~as.factor(IDENTIF_FORNECEDOR),
+                               y = ~VL_PAGO,
+                               type = "bar",
+                               color = ~as.factor(NR_CONVENIO),
+                               colors = "YlGnBu",
+                               text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
+        layout(barmode = 'stack',
+               title = paste("Perspectiva Fornecedor - ", cidades_semelhantes[3]),
+               yaxis = list(title = "Total Pago"),
+               xaxis = list(title = "Fornecedores"))
+    })
+    
+    output$plotTabela2 <- DT::renderDataTable({
+      
+      tabela_resultante = pagamentos_siconv %>%
+        filter(MUNIC_PROPONENTE %in% cidades_semelhantes,
+               UF_PROPONENTE == input$selectEstado) %>%
+        filter(NR_CONVENIO %in% cidade_convenio$NR_CONVENIO)%>%
+        select(MUNIC_PROPONENTE,
+               UF_PROPONENTE,
+               IDENTIF_FORNECEDOR,
+               NOME_FORNECEDOR,
+               NR_CONVENIO,
+               OBJETO_PROPOSTA,
+               VL_PAGO) %>%
+        group_by(MUNIC_PROPONENTE,
+                 UF_PROPONENTE,
+                 NR_CONVENIO,
+                 IDENTIF_FORNECEDOR,
+                 NOME_FORNECEDOR,
+                 OBJETO_PROPOSTA) %>%
+        summarise(total_pago = sum(VL_PAGO))
+      
+      plot_tabela = DT::datatable(tabela_resultante, 
+                                  filter = "top", 
+                                  options = list(paging = FALSE))
+    })
+    
+    plot_tabela = DT::datatable(tabela_resultante, 
+                                filter = "top", 
+                                options = list(paging = FALSE))
+  })
+  
+
+  
+  
+  
+##########################################################################
   
   observeEvent(input$button_box_00, {
     observe({

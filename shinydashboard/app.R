@@ -10,6 +10,7 @@ library(DT)
 ginicities = read_csv("data/ginicities_5.csv")
 pagamentos_siconv = read_csv("data/pagamentos_sincov.csv")
 cidade_resumo = read_csv("data/cidade_resumo_5.csv")
+cidade_convenio = read_csv("data/cidade_convenio_5.csv")
 
 
 ui <- dashboardPage( skin= "purple",

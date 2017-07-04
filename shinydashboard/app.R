@@ -5,6 +5,8 @@ library(dplyr)
 library(plotly)
 library(crosstalk)
 library(DT)
+library(highcharter)
+
 
 
 ginicities = read_csv("data/ginicities_5.csv")
@@ -104,8 +106,8 @@ ui <- dashboardPage( skin= "purple",
                       )
                     ),
                   fluidRow(
-                    box(plotlyOutput("plotConveniosTut1")),
-                    box(plotlyOutput("plotFornecedoresTut1"))
+                    box(highchartOutput("plotConveniosTut1")),
+                    box(highchartOutput("plotFornecedoresTut1"))
                   ),
                   fluidRow(
                     box(plotlyOutput("plotConveniosTut2")),
@@ -228,37 +230,61 @@ server <- function(input, output, session) {
   })
   
   
-  output$plotConveniosTut1 <- renderPlotly({
-    plot_convenios = plot_ly(pagamentos_siconv %>%
-                               filter(MUNIC_PROPONENTE == "ABAIRA",
-                                      UF_PROPONENTE == "BA"),
-                             x = ~as.factor(NR_CONVENIO),
-                             y = ~VL_PAGO,
-                             type = "bar",
-                             color = ~as.factor(IDENTIF_FORNECEDOR),
-                             colors = "RdPu",
-                             text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
-      layout(barmode = 'stack',
-             title = paste("Perspectiva Convênio - ABAIRA"),
-             yaxis = list(title = "Total Pago"),
-             xaxis = list(title = "Convênios"))
+  output$plotConveniosTut1 <- renderHighchart({
+    highchart () %>%
+      hc_add_series_df(data = pagamentos_siconv %>%
+                         filter(MUNIC_PROPONENTE == "ABAIRA",
+                                UF_PROPONENTE == "BA") %>% 
+                         group_by(MUNIC_PROPONENTE, NR_CONVENIO, IDENTIF_FORNECEDOR, NOME_FORNECEDOR, OBJETO_PROPOSTA) %>% 
+                         summarise(total = sum(VL_PAGO)) %>%
+                         arrange(-total),
+                       type = "column",
+                       x = as.factor(NR_CONVENIO),
+                       y = total, 
+                       group = as.factor(IDENTIF_FORNECEDOR)) %>%
+      hc_title(text = "Por convênio - ABAIRA") %>%
+      hc_xAxis(type = "category") %>%
+      hc_plotOptions(column = list(stacking = "normal")) %>%
+      hc_xAxis(title = list(text="Valor")) %>%
+      hc_yAxis(title = list(text="Fornecedor")) %>%
+      hc_tooltip(useHTML = TRUE,
+                 headerFormat = "<table>",
+                 pointFormat = paste("<tr><th>Convênio</th><td>{point.OBJETO_PROPOSTA}</td></tr>",
+                                    "<tr><th>Fornecedor</th><td>{point.NOME_FORNECEDOR}</td></tr>",
+                                     "<tr><th>Valor do convênio</th><td>{point.total}</td></tr>",
+                                     "<tr><th>Valor ao fornecedor</th><td>{point.y}</td></tr>"),
+                 footerFormat = "</table>") %>%
+      hc_legend(align = "right",  verticalAlign = "middle",
+                layout = "vertical")
   })
   
-  output$plotFornecedoresTut1 <- renderPlotly({
+  output$plotFornecedoresTut1 <- renderHighchart({
     
-    plot_convenios = plot_ly(pagamentos_siconv %>%
-                               filter(MUNIC_PROPONENTE == "ABAIRA",
-                                      UF_PROPONENTE == "BA"),
-                             x = ~as.factor(IDENTIF_FORNECEDOR),
-                             y = ~VL_PAGO,
-                             type = "bar",
-                             color = ~as.factor(NR_CONVENIO),
-                             colors = "YlGnBu",
-                             text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
-      layout(barmode = 'stack',
-             title = paste("Perspectiva Fornecedor - ABAIRA"),
-             yaxis = list(title = "Total Pago"),
-             xaxis = list(title = "Fornecedores"))
+    highchart () %>%
+      hc_add_series_df(data = pagamentos_siconv %>%
+                         filter(MUNIC_PROPONENTE == "ABAIRA",
+                                UF_PROPONENTE == "BA") %>% 
+                         group_by(MUNIC_PROPONENTE, IDENTIF_FORNECEDOR, NR_CONVENIO, NOME_FORNECEDOR, OBJETO_PROPOSTA) %>% 
+                         summarise(total = sum(VL_PAGO)) %>%
+                         arrange(-total),
+                       type = "column",
+                       x = as.factor(IDENTIF_FORNECEDOR),
+                       y = total, 
+                       group = as.factor(NR_CONVENIO)) %>%
+      hc_title(text = "Por fornecedor - ABAIRA") %>%
+      hc_xAxis(type = "category") %>%
+      hc_plotOptions(column = list(stacking = "normal")) %>%
+      hc_xAxis(title = list(text="Valor")) %>%
+      hc_yAxis(title = list(text="Fornecedor")) %>%
+      hc_tooltip(useHTML = TRUE,
+                 headerFormat = "<table>",
+                 pointFormat = paste("<tr><th>Fornecedor</th><td>{point.NOME_FORNECEDOR}</td></tr>",
+                                     "<tr><th>Convênio</th><td>{point.OBJETO_PROPOSTA}</td></tr>",
+                                     "<tr><th>Valor do fornecedor</th><td>{point.total}</td></tr>",
+                                     "<tr><th>Valor ao convênio</th><td>{point.y}</td></tr>"),
+                 footerFormat = "</table>")%>%
+      hc_legend(align = "right",  verticalAlign = "middle",
+                layout = "vertical")
   })
   
   output$plotConveniosTut2 <- renderPlotly({
@@ -838,3 +864,61 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
+
+# highchart() %>% 
+#   hc_chart(type = "column") %>% 
+#   hc_xAxis(categories = (pagamentos_siconv %>%
+#                           filter(MUNIC_PROPONENTE == "ABAIRA",
+#                                  UF_PROPONENTE == "BA") %>% group_by(NR_CONVENIO))$NR_CONVENIO ) %>%
+#   hc_add_series((pagamentos_siconv %>%
+#                    filter(MUNIC_PROPONENTE == "ABAIRA",
+#                           UF_PROPONENTE == "BA") %>% group_by(IDENTIF_FORNECEDOR))$VL_PAGO) %>%
+#   hc_plotOptions(column = list(stacking = "normal"))
+# 
+# 
+# highchart () %>%
+#   hc_add_series_df(data = pagamentos_siconv %>%
+#                      filter(MUNIC_PROPONENTE == "ABAIRA",
+#                             UF_PROPONENTE == "BA") %>% 
+#                      group_by(MUNIC_PROPONENTE, NR_CONVENIO, IDENTIF_FORNECEDOR, NOME_FORNECEDOR, OBJETO_PROPOSTA) %>% 
+#                      summarise(total = sum(VL_PAGO)) ,
+#                    type = "column",
+#                    x = as.factor(NR_CONVENIO),
+#                    y = total, 
+#                    group = as.factor(IDENTIF_FORNECEDOR)) %>%
+#   hc_xAxis(type = "category") %>%
+#   hc_plotOptions(column = list(stacking = "normal")) %>%
+#   hc_tooltip(useHTML = TRUE,
+#              headerFormat = "<table>",
+#              pointFormat = paste("<tr><th>Fornecedor</th><td>{point.NOME_FORNECEDOR}</td></tr>",
+#                                  "<tr><th>Convênio</th><td>{point.OBJETO_PROPOSTA}</td></tr>",
+#                                  "<tr><th>Valor do convênio</th><td>{point.total}</td></tr>",
+#                                  "<tr><th>Valor ao fornecedor</th><td>{point.y}</td></tr>"),
+#              footerFormat = "</table>")
+# 
+# dados = data_frame(f1 = c("a", "b", "c", "a", "b", "c"), f2 = c("aa", "bb", "cc", "cc", "bb", "aa"), f3 = c(1,2,3, 3, 2,1))
+# 
+# highchart () %>%
+#   hc_add_series_df(data = dados,
+#                    type = "column",
+#                    x = f1,
+#                    y = f3, 
+#                    group = f2) %>%
+#   hc_xAxis(type = "category") %>%
+#   
+#   hc_plotOptions(column = list(stacking = "normal"))
+# 
+# 
+# mpgman2 <- count(mpg, manufacturer, year)
+# hc_add_series_df(highchart(), mpgman2, "column", x = manufacturer, y = n, group = year) %>% 
+#   hc_xAxis(type = "category") %>%
+#   hc_plotOptions(column = list(stacking = "normal"))
+# 
+# data = pagamentos_siconv %>%
+#   filter(MUNIC_PROPONENTE == "ABAIRA",
+#          UF_PROPONENTE == "BA") %>% 
+#   group_by(MUNIC_PROPONENTE, NR_CONVENIO, IDENTIF_FORNECEDOR, NOME_FORNECEDOR, OBJETO_PROPOSTA) %>% 
+#   summarise(total = sum(VL_PAGO)) %>% left_join(pagamentos_siconv %>%
+#                                                   filter(MUNIC_PROPONENTE == "ABAIRA",
+#                                                          UF_PROPONENTE == "BA") %>% 
+#                                                   group_by(MUNIC_PROPONENTE, NR_CONVENIO) %>% summarise(total_conv = sum(VL_PAGO)))

@@ -6,6 +6,7 @@ library(plotly)
 library(crosstalk)
 library(DT)
 library(highcharter)
+options(scipen=999)
 
 
 
@@ -372,7 +373,7 @@ server <- function(input, output, session) {
                IDENTIF_FORNECEDOR,
                NOME_FORNECEDOR,
                OBJETO_PROPOSTA) %>%
-      summarise(total_pago = sum(VL_PAGO))
+      summarise(total_pago = format(round(sum(VL_PAGO), 2), nsmall=2, big.mark=","))
     
     plot_tabela = DT::datatable(tabela_resultante, 
                                 filter = "top", 
@@ -619,7 +620,7 @@ server <- function(input, output, session) {
                  IDENTIF_FORNECEDOR,
                  NOME_FORNECEDOR,
                  OBJETO_PROPOSTA) %>%
-        summarise(total_pago = sum(VL_PAGO))
+        summarise(total_pago = format(round(sum(VL_PAGO), 2), nsmall=2, big.mark=","))
       
       plot_tabela = DT::datatable(tabela_resultante, 
                                   filter = "top", 

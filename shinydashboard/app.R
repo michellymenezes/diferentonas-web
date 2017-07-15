@@ -236,41 +236,28 @@ server <- function(input, output, session) {
                                 options = list(paging = FALSE))
   })
   
-  
   output$plotConveniosTut1 <- renderHighchart({
-    
     highcharter_convenios(pagamentos_siconv, "ABAIRA", "BA")
-  
   })
   
   output$plotFornecedoresTut1 <- renderHighchart({
-    
     highcharter_fornecedores(pagamentos_siconv, "ABAIRA", "BA")
-    
   })
   
   output$plotConveniosTut2 <- renderHighchart({
-    
     highcharter_convenios(pagamentos_siconv, "MAIQUINIQUE", "BA")
-    
   })
   
   output$plotFornecedoresTut2 <- renderHighchart({
-    
     highcharter_fornecedores(pagamentos_siconv, "MAIQUINIQUE", "BA")
-    
   })
   
   output$plotConveniosTut3 <- renderHighchart({
-    
     highcharter_convenios(pagamentos_siconv, "PLANALTINO", "BA")
-    
   })
   
   output$plotFornecedoresTut3 <- renderHighchart({
-    
     highcharter_fornecedores(pagamentos_siconv, "PLANALTINO", "BA")
-    
   })
   
   output$plotTabelaTut <- DT::renderDataTable({
@@ -300,94 +287,6 @@ server <- function(input, output, session) {
     plot_tabela = DT::datatable(tabela_resultante, 
                                 filter = "top", 
                                 options = list(paging = FALSE))
-  })
-  
-  
-  
-  
-  
-  
-  
-  shared_cidade_resumo = SharedData$new(cidade_resumo)
-  
-  output$plotConvenios1 <- renderPlotly({
-    cidadesEstado = cidade_resumo %>%
-      filter(UF_PROPONENTE == input$selectEstado)
-    
-    cidadesEstado$dist = dist(rbind(cidadesEstado %>%
-                                      filter(MUNIC_PROPONENTE == input$selectCidade) %>%
-                                      select(pop),
-                                    cidadesEstado %>%
-                                      select(pop)))[1:NROW(cidadesEstado)]
-    
-    cidades_semelhantes = (cidadesEstado %>%
-                             arrange(dist) %>%
-                             slice(1:3))$MUNIC_PROPONENTE
-    
-    dclass <- data_frame(from = seq(0, 10, by = 2),
-                         to = c(seq(2, 10, by = 2), 50),
-                         color = substring(viridis(length(from), option = "C"), 0, 7))
-    dclass <- list.parse3(dclass)
-    
-    
-    highchart () %>%
-      hc_add_series_df(data = pagamentos_siconv %>%
-                         filter(MUNIC_PROPONENTE == cidades_semelhantes[1],
-                                UF_PROPONENTE == input$selectEstado) %>% 
-                         group_by(MUNIC_PROPONENTE, NR_CONVENIO, IDENTIF_FORNECEDOR, NOME_FORNECEDOR, OBJETO_PROPOSTA) %>% 
-                         summarise(total = sum(VL_PAGO)) %>%
-                         arrange(-total),
-                       type = "column",
-                       x = as.factor(NR_CONVENIO),
-                       y = total, 
-                       group = as.factor(IDENTIF_FORNECEDOR)) %>%
-      hc_title(text = paste("Por convênio - ", cidades_semelhantes[1])) %>%
-      hc_xAxis(type = "category", title = list(text="Convênio")) %>%
-      hc_plotOptions(column = list(stacking = "normal")) %>%
-      hc_yAxis(title = list(text="Valor")) %>%
-      #hc_add_theme(hc_theme_538()) %>%
-      hc_tooltip(useHTML = TRUE,
-                 headerFormat = "<table>",
-                 pointFormat = paste("<tr><th>Convênio</th><td>{point.OBJETO_PROPOSTA}</td></tr>",
-                                     "<tr><th>Fornecedor</th><td>{point.NOME_FORNECEDOR}</td></tr>",
-                                     "<tr><th>Valor do convênio</th><td>{point.total}</td></tr>",
-                                     "<tr><th>Valor ao fornecedor</th><td>{point.y}</td></tr>"),
-                 footerFormat = "</table>") %>%
-      hc_legend(align = "right",  verticalAlign = "middle",
-                layout = "vertical")
-    
-  })
-  
-
-  
-  output$plotFornecedores1 <- renderPlotly({
-    
-    cidadesEstado = cidade_resumo %>%
-      filter(UF_PROPONENTE == input$selectEstado)
-    
-    cidadesEstado$dist = dist(rbind(cidadesEstado %>%
-                                      filter(MUNIC_PROPONENTE == input$selectCidade) %>%
-                                      select(pop),
-                                    cidadesEstado %>%
-                                      select(pop)))[1:NROW(cidadesEstado)]
-    
-    cidades_semelhantes = (cidadesEstado %>%
-                             arrange(dist) %>%
-                             slice(1:3))$MUNIC_PROPONENTE
-    
-    plot_convenios = plot_ly(pagamentos_siconv %>%
-                               filter(MUNIC_PROPONENTE == cidades_semelhantes[1],
-                                      UF_PROPONENTE == input$selectEstado),
-                             x = ~as.factor(IDENTIF_FORNECEDOR),
-                             y = ~VL_PAGO,
-                             type = "bar",
-                             color = ~as.factor(NR_CONVENIO),
-                       #      colors = "YlGnBu",
-                             text = ~paste("Proposta: ", OBJETO_PROPOSTA, "<br>Fornecedor:", NOME_FORNECEDOR)) %>%
-      layout(barmode = 'stack',
-             title = paste("Perspectiva Fornecedor - ", cidades_semelhantes[1]),
-             yaxis = list(title = "Total Pago"),
-             xaxis = list(title = "Fornecedores"))
   })
   
 ##################################################
@@ -439,38 +338,27 @@ server <- function(input, output, session) {
     })
     
     output$plotConvenios11 <- renderHighchart({
-      
       highcharter_convenios(pagamentos_siconv, cidades_semelhantes[1], input$selectEstado)
-      
     })
     
     output$plotConvenios12 <- renderHighchart({
-      
       highcharter_convenios(pagamentos_siconv, cidades_semelhantes[2], input$selectEstado)
-      
     })
     
     output$plotConvenios13 <- renderHighchart({
-      
       highcharter_convenios(pagamentos_siconv, cidades_semelhantes[3], input$selectEstado)
-      
     })
     
     output$plotFornecedores11 <- renderHighchart({
-      
       highcharter_fornecedores(pagamentos_siconv, cidades_semelhantes[1], input$selectEstado)
     })
     
     output$plotFornecedores12 <- renderHighchart({
-      
       highcharter_fornecedores(pagamentos_siconv, cidades_semelhantes[2], input$selectEstado)
-      
     })
     
     output$plotFornecedores13 <- renderHighchart({
-      
       highcharter_fornecedores(pagamentos_siconv, cidades_semelhantes[3], input$selectEstado)
-      
     })
     
     output$plotTabela2 <- DT::renderDataTable({
@@ -510,10 +398,7 @@ server <- function(input, output, session) {
                                 filter = "top", 
                                 options = list(paging = FALSE))
   })
-  
 
-  
-  
   
 ##########################################################################
   
@@ -645,102 +530,33 @@ server <- function(input, output, session) {
   
 
   output$box_00 <- renderValueBox({
-    box0<-valueBox(value=0
-                   ,icon = icon("compass")
-                   ,width=3
-                   ,color = "red"
-                   ,href="#"
-                   ,subtitle=HTML("<b>O cenário</b>")
-    )
-      
-    box0$children[[1]]$attribs$class<-"action-button"
-    box0$children[[1]]$attribs$id<-"button_box_00"
-    return(box0)
+        box_navegador(0, "<b>O cenário</b>", "red", "button_box_00", "compass", 3)
   })
   
   output$box_01 <- renderValueBox({
-    box1<-valueBox(value=1
-                   ,icon = icon("globe")
-                   ,width=3
-                   ,color = "yellow"
-                   ,href="#"
-                   ,subtitle=HTML("<b>A cidade</b>")
-    )
-    
-    box1$children[[1]]$attribs$class<-"action-button"
-    box1$children[[1]]$attribs$id<-"button_box_01"
-    return(box1)
+    box_navegador(1, "<b>A cidade</b>", "yellow", "button_box_01", "globe", 3)
   })
   
   output$box_02 <- renderValueBox({
-    box2<-valueBox(value=2
-                   ,icon = icon("group")
-                   ,width=3
-                   ,color = "yellow"
-                   ,href="#"
-                   ,subtitle=HTML("<b>Os fornecedores</b>")
-    )
-    
-    box2$children[[1]]$attribs$class<-"action-button"
-    box2$children[[1]]$attribs$id<-"button_box_02"
-    return(box2)
+    box_navegador(2, "<b>Os fornecedores</b>", "yellow", "button_box_02", "group", 3)
   })
   
   output$box_03 <- renderValueBox({
-    box3<-valueBox(value=3
-                   ,icon = icon("table")
-                   ,width=3
-                   ,color = "yellow"
-                   ,href="#"
-                   ,subtitle=HTML("<b>Mais detalhes</b>")
-    )
-    
-    box3$children[[1]]$attribs$class<-"action-button"
-    box3$children[[1]]$attribs$id<-"button_box_03"
-    return(box3)
+    box_navegador(3, "<b>Mais detalhes</b>", "yellow", "button_box_03", "table", 3)
   })
   
   output$box_11 <- renderValueBox({
-    box11<-valueBox(value=1
-                   ,icon = icon("globe")
-                   ,width=4
-                   ,color = "yellow"
-                   ,href="#"
-                   ,subtitle=HTML("<b>A cidade</b>")
-    )
-    
-    box11$children[[1]]$attribs$class<-"action-button"
-    box11$children[[1]]$attribs$id<-"button_box_11"
-    return(box11)
+    box_navegador(1, "<b>A cidade</b>", "yellow", "button_box_11", "globe", 4)
   })
   
   output$box_12 <- renderValueBox({
-    box12<-valueBox(value=2
-                   ,icon = icon("group")
-                   ,width=4
-                   ,color = "yellow"
-                   ,href="#"
-                   ,subtitle=HTML("<b>Os fornecedores</b>")
-    )
-    
-    box12$children[[1]]$attribs$class<-"action-button"
-    box12$children[[1]]$attribs$id<-"button_box_12"
-    return(box12)
+    box_navegador(2, "<b>Os fornecedores</b>", "yellow", "button_box_12", "group", 4)
   })
   
   output$box_13 <- renderValueBox({
-    box13<-valueBox(value=3
-                   ,icon = icon("table")
-                   ,width=4
-                   ,color = "yellow"
-                   ,href="#"
-                   ,subtitle=HTML("<b>Mais detalhes</b>")
-    )
-    
-    box13$children[[1]]$attribs$class<-"action-button"
-    box13$children[[1]]$attribs$id<-"button_box_13"
-    return(box13)
+    box_navegador(3, "<b>Mais detalhes</b>", "yellow", "button_box_13", "group", 4)
   })
+  
 }
 
 shinyApp(ui, server)

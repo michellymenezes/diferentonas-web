@@ -1,5 +1,6 @@
 library(highcharter)
 library(dplyr)
+library(shinydashboard)
 
 highcharter_fornecedores = function(pagamentos_siconv, cidade, estado){
   hc = highchart () %>%
@@ -56,4 +57,20 @@ highcharter_convenios = function(pagamentos_siconv, cidade, estado){
     hc_legend(align = "right",  verticalAlign = "middle",
               layout = "vertical")
 }
+
+
+box_navegador = function(valor, nome, cor, id, icone, coluna){
   
+  box0<-valueBox(value=valor
+                 ,icon = icon(icone)
+                 ,width=coluna
+                 ,color = cor
+                 ,href="#"
+                 ,subtitle=HTML(nome)
+  )
+  
+  box0$children[[1]]$attribs$class<-"action-button"
+  box0$children[[1]]$attribs$id<-id
+  return(box0)
+  
+}

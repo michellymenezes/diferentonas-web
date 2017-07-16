@@ -1,6 +1,8 @@
 library(highcharter)
 library(dplyr)
 library(shinydashboard)
+library(DT)
+
 
 highcharter_fornecedores = function(pagamentos_siconv, cidade, estado){
   hc = highchart () %>%
@@ -73,4 +75,34 @@ box_navegador = function(valor, nome, cor, id, icone, coluna){
   box0$children[[1]]$attribs$id<-id
   return(box0)
   
+}
+
+tabela_detalhes = function(pagamentos_siconv, cidades_semelhantes, estado, cidade_convenio){
+  tabela_resultante = pagamentos_siconv %>%
+    filter(MUNIC_PROPONENTE %in% cidades_semelhantes,
+           UF_PROPONENTE == estado) %>%
+    filter(NR_CONVENIO %in% cidade_convenio$NR_CONVENIO)%>%
+    select(MUNIC_PROPONENTE,
+           UF_PROPONENTE,
+           IDENTIF_FORNECEDOR,
+           NOME_FORNECEDOR,
+           NR_CONVENIO,
+           OBJETO_PROPOSTA,
+           VL_PAGO) %>%
+    group_by(MUNIC_PROPONENTE,
+             UF_PROPONENTE,
+             NR_CONVENIO,
+             IDENTIF_FORNECEDOR,
+             NOME_FORNECEDOR,
+             OBJETO_PROPOSTA) %>%
+    summarise(total_pago = format(round(sum(VL_PAGO), 2), nsmall=2, big.mark=","))
+  
+  names(tabela_resultante) = c("Município", "Estado", "Nº do convênio", "CNPJ do forncecedor",
+                               "Nome do fornecedor", "Proposta do convênio", "Valor pago")
+  
+  plot_tabela = DT::datatable(tabela_resultante, 
+                              filter = "top", 
+                              options = list(paging = FALSE))
+  
+  return(plot_tabela)
 }

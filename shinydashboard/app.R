@@ -261,32 +261,7 @@ server <- function(input, output, session) {
   })
   
   output$plotTabelaTut <- DT::renderDataTable({
-    
-    tabela_resultante = pagamentos_siconv %>%
-      filter(MUNIC_PROPONENTE %in% c("ABAIRA", "MAIQUINIQUE", "PLANALTINO"),
-             UF_PROPONENTE == "BA") %>%
-      filter(NR_CONVENIO %in% cidade_convenio$NR_CONVENIO)%>%
-      select(MUNIC_PROPONENTE,
-             UF_PROPONENTE,
-             IDENTIF_FORNECEDOR,
-             NOME_FORNECEDOR,
-             NR_CONVENIO,
-             OBJETO_PROPOSTA,
-             VL_PAGO) %>%
-      group_by(MUNIC_PROPONENTE,
-               UF_PROPONENTE,
-               NR_CONVENIO,
-               IDENTIF_FORNECEDOR,
-               NOME_FORNECEDOR,
-               OBJETO_PROPOSTA) %>%
-      summarise(total_pago = format(round(sum(VL_PAGO), 2), nsmall=2, big.mark=","))
-    
-    names(tabela_resultante) = c("Município", "Estado", "Nº do convênio", "CNPJ do forncecedor",
-                                 "Nome do fornecedor", "Proposta do convênio", "Valor pago")
-    
-    plot_tabela = DT::datatable(tabela_resultante, 
-                                filter = "top", 
-                                options = list(paging = FALSE))
+    tabela_detalhes(pagamentos_siconv, c("ABAIRA", "MAIQUINIQUE", "PLANALTINO"), "BA", cidade_convenio)
   })
   
 ##################################################
@@ -362,32 +337,7 @@ server <- function(input, output, session) {
     })
     
     output$plotTabela2 <- DT::renderDataTable({
-      
-      tabela_resultante = pagamentos_siconv %>%
-        filter(MUNIC_PROPONENTE %in% cidades_semelhantes,
-               UF_PROPONENTE == input$selectEstado) %>%
-        filter(NR_CONVENIO %in% cidade_convenio$NR_CONVENIO)%>%
-        select(MUNIC_PROPONENTE,
-               UF_PROPONENTE,
-               IDENTIF_FORNECEDOR,
-               NOME_FORNECEDOR,
-               NR_CONVENIO,
-               OBJETO_PROPOSTA,
-               VL_PAGO) %>%
-        group_by(MUNIC_PROPONENTE,
-                 UF_PROPONENTE,
-                 NR_CONVENIO,
-                 IDENTIF_FORNECEDOR,
-                 NOME_FORNECEDOR,
-                 OBJETO_PROPOSTA) %>%
-        summarise(total_pago = format(round(sum(VL_PAGO), 2), nsmall=2, big.mark=","))
-      
-      names(tabela_resultante) = c("Município", "Estado", "Nº do convênio", "CNPJ do forncecedor",
-                                   "Nome do fornecedor", "Proposta do convênio", "Valor pago")
-      
-      plot_tabela = DT::datatable(tabela_resultante, 
-                                  filter = "top", 
-                                  options = list(paging = FALSE))
+      tabela_detalhes(pagamentos_siconv, cidades_semelhantes, input$selectEstado, cidade_convenio)
     })
     
     names(tabela_resultante) = c("Cód. IBGE", "Município", "Estado", "Nº de fornecedores",

@@ -77,9 +77,9 @@ ui <- dashboardPage( skin= "purple",
                       )
                     ),
                   fluidRow(
-                    infoBox(width = 4, "Abaíra", "286.5911%", icon = icon("percent"), color = "teal"),
-                    infoBox(width = 4, "Maiquinique", "73.60089%", icon = icon("percent"), color = "teal"),
-                    infoBox(width = 4, "Planaltino", "211.9592%", icon = icon("percent"), color = "teal")
+                    infoBoxOutput("giniBox01"),
+                    infoBoxOutput("giniBox02"),
+                    infoBoxOutput("giniBox03")
                     ),
                   fluidRow(
                     box(width = 12,
@@ -210,79 +210,109 @@ server <- function(input, output, session) {
   
   output$cidadesSemelhantes <- DT::renderDataTable({
     
-    cidadesEstado = cidade_resumo %>%
-      filter(UF_PROPONENTE == "BA")
+    cidadesProximas = cidade_resumo
     
-    cidadesEstado$dist = dist(rbind(cidadesEstado %>%
+    cidadesProximas$dist = dist(rbind(cidadesProximas %>%
                                       filter(MUNIC_PROPONENTE == "ABAIRA") %>%
                                       select(pop),
-                                    cidadesEstado %>%
-                                      select(pop)))[1:NROW(cidadesEstado)]
+                                      cidadesProximas %>%
+                                      select(pop)))[1:NROW(cidadesProximas)]
     
-    cidades_semelhantes = (cidadesEstado %>%
+    cidades_semelhantes = (cidadesProximas %>%
                              arrange(dist) %>%
                              slice(1:3))$MUNIC_PROPONENTE
     
     tabela_resultante = cidade_resumo %>%
-      filter(MUNIC_PROPONENTE %in% cidades_semelhantes,
-             UF_PROPONENTE == "BA")
-    
-    names(tabela_resultante) = c("Cód. IBGE", "Município", "Estado", "Nº de fornecedores",
-                                 "Nº de convênios", "Total arrecadado", "IDH", "IDH - Renda",
-                                 "IDH - Longevidade", "IDH - Educação", "População")
-    
-    plot_tabela = DT::datatable(tabela_resultante, 
-                                filter = "top", 
-                                options = list(paging = FALSE))
-  })
+      filter(MUNIC_PROPONENTE %in% cidades_semelhantes)
   
+    output$giniBox01 <- renderInfoBox({
+      munic = cidades_semelhantes[1]
+      infoBox(width = 4, 
+              munic, 
+              paste((ginicities %>% filter(cidade == munic))$coef * 100, "%" ), 
+              icon = icon("percent"),
+              color = "teal")
+    })
+    
+    
+    output$giniBox02 <- renderInfoBox({
+      munic = cidades_semelhantes[2]
+      infoBox(width = 4, 
+              munic, 
+              paste((ginicities %>% filter(cidade == munic))$coef * 100, "%" ), 
+              icon = icon("percent"),
+              color = "teal")
+    })
+    
+    output$giniBox03 <- renderInfoBox({
+      munic = cidades_semelhantes[3]
+      infoBox(width = 4, 
+              munic, 
+              paste((ginicities %>% filter(cidade == munic))$coef * 100, "%" ), 
+              icon = icon("percent"),
+              color = "teal")
+    })
   output$plotConveniosTut1 <- renderHighchart({
-    highcharter_convenios(pagamentos_siconv, "ABAIRA", "BA")
+    highcharter_convenios(pagamentos_siconv, cidades_semelhantes[1], "BA")
   })
   
   output$plotFornecedoresTut1 <- renderHighchart({
-    highcharter_fornecedores(pagamentos_siconv, "ABAIRA", "BA")
+    highcharter_fornecedores(pagamentos_siconv, cidades_semelhantes[1], "BA")
   })
   
   output$plotConveniosTut2 <- renderHighchart({
-    highcharter_convenios(pagamentos_siconv, "MAIQUINIQUE", "BA")
+    highcharter_convenios(pagamentos_siconv, cidades_semelhantes[2], "BA")
   })
   
   output$plotFornecedoresTut2 <- renderHighchart({
-    highcharter_fornecedores(pagamentos_siconv, "MAIQUINIQUE", "BA")
+    highcharter_fornecedores(pagamentos_siconv, cidades_semelhantes[2], "BA")
   })
   
   output$plotConveniosTut3 <- renderHighchart({
-    highcharter_convenios(pagamentos_siconv, "PLANALTINO", "BA")
+    highcharter_convenios(pagamentos_siconv, cidades_semelhantes[3], "BA")
   })
   
   output$plotFornecedoresTut3 <- renderHighchart({
-    highcharter_fornecedores(pagamentos_siconv, "PLANALTINO", "BA")
+    highcharter_fornecedores(pagamentos_siconv, cidades_semelhantes[3], "BA")
   })
   
   output$plotTabelaTut <- DT::renderDataTable({
-    tabela_detalhes(pagamentos_siconv, c("ABAIRA", "MAIQUINIQUE", "PLANALTINO"), "BA", cidade_convenio)
+    tabela_detalhes(pagamentos_siconv, cidades_semelhantes, "BA", cidade_convenio)
+  })
+  
+  names(tabela_resultante) = c("Cód. IBGE", "Município", "Estado", "Nº de fornecedores",
+                               "Nº de convênios", "Total arrecadado", "IDH", "IDH - Renda",
+                               "IDH - Longevidade", "IDH - Educação", "População")
+  
+  plot_tabela = DT::datatable(tabela_resultante, 
+                              filter = "top", 
+                              options = list(paging = FALSE))
+  
+  
   })
   
 ##################################################
   
   output$cidadesSemelhantes2 <- DT::renderDataTable({
     
-    cidadesEstado = cidade_resumo %>%
-      filter(UF_PROPONENTE == input$selectEstado)
+    cidadesProximas = cidade_resumo
     
-    cidadesEstado$dist = dist(rbind(cidadesEstado %>%
+    cidadesProximas$dist = dist(rbind(cidadesProximas %>%
                                       filter(MUNIC_PROPONENTE == input$selectCidade) %>%
                                       select(pop),
-                                    cidadesEstado %>%
-                                      select(pop)))[1:NROW(cidadesEstado)]
-    cidades_semelhantes = (cidadesEstado %>%
+                                      cidadesProximas %>%
+                                      select(pop)))[1:NROW(cidadesProximas)]
+    cidades_semelhantes = (cidadesProximas %>%
                              arrange(dist) %>%
                              slice(1:3))$MUNIC_PROPONENTE
     
+    cidades_semelhantes_id = (cidadesProximas %>%
+                             arrange(dist) %>%
+                             slice(1:3))$cod7
+    
     tabela_resultante = cidade_resumo %>%
-      filter(MUNIC_PROPONENTE %in% cidades_semelhantes,
-             UF_PROPONENTE == input$selectEstado)
+      filter(MUNIC_PROPONENTE %in% cidades_semelhantes)
+#             UF_PROPONENTE == input$selectEstado)
     
     output$giniBox1 <- renderInfoBox({
       munic = cidades_semelhantes[1]

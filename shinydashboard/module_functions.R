@@ -7,8 +7,8 @@ library(DT)
 highcharter_fornecedores = function(pagamentos_siconv, cidade, estado){
   hc = highchart () %>%
     hc_add_series_df(data = pagamentos_siconv %>%
-                       filter(MUNIC_PROPONENTE == cidade,
-                              UF_PROPONENTE == estado) %>% 
+                       filter(MUNIC_PROPONENTE == cidade) %>%
+#                              UF_PROPONENTE == estado) %>% 
                        group_by(MUNIC_PROPONENTE, IDENTIF_FORNECEDOR, NR_CONVENIO, NOME_FORNECEDOR, OBJETO_PROPOSTA) %>% 
                        summarise(total = sum(VL_PAGO)) %>%
                        arrange(-total),
@@ -36,9 +36,9 @@ highcharter_fornecedores = function(pagamentos_siconv, cidade, estado){
 highcharter_convenios = function(pagamentos_siconv, cidade, estado){
   highchart () %>%
     hc_add_series_df(data = pagamentos_siconv %>%
-                       filter(MUNIC_PROPONENTE == cidade,
-                              UF_PROPONENTE == estado) %>% 
-                       group_by(MUNIC_PROPONENTE, NR_CONVENIO, IDENTIF_FORNECEDOR, NOME_FORNECEDOR, OBJETO_PROPOSTA) %>% 
+                       filter(MUNIC_PROPONENTE == cidade)%>%
+#                              UF_PROPONENTE == estado) %>% 
+                       group_by(MUNIC_PROPONENTE, UF_PROPONENTE, NR_CONVENIO, IDENTIF_FORNECEDOR, NOME_FORNECEDOR, OBJETO_PROPOSTA) %>% 
                        summarise(total = sum(VL_PAGO)) %>%
                        arrange(-total),
                      type = "column",
@@ -79,8 +79,8 @@ box_navegador = function(valor, nome, cor, id, icone, coluna){
 
 tabela_detalhes = function(pagamentos_siconv, cidades_semelhantes, estado, cidade_convenio){
   tabela_resultante = pagamentos_siconv %>%
-    filter(MUNIC_PROPONENTE %in% cidades_semelhantes,
-           UF_PROPONENTE == estado) %>%
+    filter(MUNIC_PROPONENTE %in% cidades_semelhantes) %>%
+#           UF_PROPONENTE == estado) %>%
     filter(NR_CONVENIO %in% cidade_convenio$NR_CONVENIO)%>%
     select(MUNIC_PROPONENTE,
            UF_PROPONENTE,

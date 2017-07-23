@@ -229,7 +229,7 @@ server <- function(input, output, session) {
       munic = cidades_semelhantes[1]
       infoBox(width = 4, 
               munic, 
-              paste((ginicities %>% filter(cidade == munic))$coef * 100, "%" ), 
+              format(round((ginicities %>% filter(cidade == munic))$coef,3), nsmall = 3), 
               icon = icon("percent"),
               color = "teal")
     })
@@ -239,7 +239,7 @@ server <- function(input, output, session) {
       munic = cidades_semelhantes[2]
       infoBox(width = 4, 
               munic, 
-              paste((ginicities %>% filter(cidade == munic))$coef * 100, "%" ), 
+              format(round((ginicities %>% filter(cidade == munic))$coef,3), nsmall = 3), 
               icon = icon("percent"),
               color = "teal")
     })
@@ -248,7 +248,7 @@ server <- function(input, output, session) {
       munic = cidades_semelhantes[3]
       infoBox(width = 4, 
               munic, 
-              paste((ginicities %>% filter(cidade == munic))$coef * 100, "%" ), 
+              format(round((ginicities %>% filter(cidade == munic))$coef,3), nsmall = 3), 
               icon = icon("percent"),
               color = "teal")
     })
@@ -318,7 +318,7 @@ server <- function(input, output, session) {
       munic = cidades_semelhantes[1]
       infoBox(width = 4, 
               munic, 
-              paste((ginicities %>% filter(cidade == munic))$coef * 100, "%" ), 
+              format(round((ginicities %>% filter(cidade == munic))$coef,3), nsmall = 3), 
               icon = icon("percent"),
               color = "teal")
     })
@@ -328,7 +328,7 @@ server <- function(input, output, session) {
       munic = cidades_semelhantes[2]
       infoBox(width = 4, 
             munic, 
-            paste((ginicities %>% filter(cidade == munic))$coef * 100, "%" ), 
+            format(round((ginicities %>% filter(cidade == munic))$coef,3), nsmall = 3), 
             icon = icon("percent"),
             color = "teal")
     })
@@ -337,7 +337,7 @@ server <- function(input, output, session) {
       munic = cidades_semelhantes[3]
       infoBox(width = 4, 
             munic, 
-            paste((ginicities %>% filter(cidade == munic))$coef * 100, "%" ), 
+            format(round((ginicities %>% filter(cidade == munic))$coef,3), nsmall = 3), 
             icon = icon("percent"),
             color = "teal")
     })

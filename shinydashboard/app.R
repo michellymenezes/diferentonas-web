@@ -10,10 +10,16 @@ options(scipen=999)
 
 source("module_functions.R")
 
-ginicities = read_csv("data/ginicities_5.csv")
+ginicities = read_csv("data/ginicities_5_new.csv")
 pagamentos_siconv = read_csv("data/pagamentos_sincov.csv")
 cidade_resumo = read_csv("data/cidade_resumo_5.csv")
 cidade_convenio = read_csv("data/cidade_convenio_5.csv")
+coef_ref = data_frame("cod7" = c("3127909", "2916401", "4322343"),
+                      "cidade" = c( "GRUPIARA", "ITAPETINGA", "UBIRETAMA"),
+                      "legenda" = c( "Município com menor coef.", "Mediana de coeficientes", "Município com maior coef."),
+                      "UF" = c("MG", "BA", "RS" ),
+                      "pop" = c(3127909, 68273, 2296),
+                      "coef" = c(0.01709639, 2.036940,19.655514))
 
 
 ui <- dashboardPage( skin= "purple",
@@ -77,9 +83,12 @@ ui <- dashboardPage( skin= "purple",
                       )
                     ),
                   fluidRow(
-                    infoBoxOutput("giniBox01"),
-                    infoBoxOutput("giniBox02"),
-                    infoBoxOutput("giniBox03")
+                    column(width = 3,
+                           fluidRow(style='padding-top:30px;', infoBoxOutput(width = 12, "giniBox01")),
+                           fluidRow(style='padding-top:30px;', infoBoxOutput(width = 12, "giniBox02")),
+                           fluidRow(style='padding-top:30px;', infoBoxOutput(width = 12, "giniBox03"))
+                           ),
+                    column(width = 9, fluidRow(box(width = 12, highchartOutput("giniInfoCoef00"))))
                     ),
                   fluidRow(
                     box(width = 12,
@@ -152,9 +161,13 @@ ui <- dashboardPage( skin= "purple",
                 conditionalPanel(
                   condition = "input.panel2 == 1",
                   fluidRow(
-                    infoBoxOutput("giniBox1"),
-                    infoBoxOutput("giniBox2"),
-                    infoBoxOutput("giniBox3")
+                    
+                    column(width = 3,
+                           fluidRow(style='padding-top:30px;', infoBoxOutput(width = 12, "giniBox1")),
+                           fluidRow(style='padding-top:30px;', infoBoxOutput(width = 12, "giniBox2")),
+                           fluidRow(style='padding-top:30px;', infoBoxOutput(width = 12, "giniBox3"))
+                    ),
+                    column(width = 9, fluidRow(box(width = 12, highchartOutput("giniInfoCoef11"))))
                   ),
                   fluidRow(
                     box(width = 12,
@@ -221,7 +234,36 @@ server <- function(input, output, session) {
     cidades_semelhantes = (cidadesProximas %>%
                              arrange(dist) %>%
                              slice(1:3))$MUNIC_PROPONENTE
-    
+  
+
+    output$giniInfoCoef00 <- renderHighchart({
+      temp = ginicities %>% filter(cidades_semelhantes[1] == cidade |
+                                     cidades_semelhantes[2] == cidade |
+                                     cidades_semelhantes[3] == cidade) %>%
+        mutate("legenda" = cidade) %>%
+        select(cod7, cidade, UF, pop, coef, legenda)
+      
+
+      info_coef = coef_ref %>% rbind(temp)
+      
+      highchart () %>%
+        hc_add_series_df(data = info_coef, 
+                         type = "bubble", 
+                         x = as.factor(legenda),
+                         y= coef, size = pop) %>%
+        hc_title(text = "Municípios e seus coeficientes") %>%
+        hc_xAxis(type = "category", title = list(text="Municípios")) %>%
+        hc_yAxis(title = list(text="Coeficiente de supercontratação")) %>%
+        hc_legend(enabled = F) %>%
+        hc_tooltip(useHTML = TRUE,
+                   headerFormat = "<table>",
+                   pointFormat = paste("<tr><th>Cidade</th><td>{point.cidade}</td></tr>",
+                                       "<tr><th>Estado</th><td>{point.UF}</td></tr>",
+                                       "<tr><th>Coeficiente</th><td>{point.y}</td></tr>",
+                                       "<tr><th>População</th><td>{point.pop}</td></tr>"),
+                   footerFormat = "</table>")
+    })
+
     tabela_resultante = cidade_resumo %>%
       filter(MUNIC_PROPONENTE %in% cidades_semelhantes)
   
@@ -305,6 +347,36 @@ server <- function(input, output, session) {
     cidades_semelhantes = (cidadesProximas %>%
                              arrange(dist) %>%
                              slice(1:3))$MUNIC_PROPONENTE
+    
+    
+    output$giniInfoCoef11 <- renderHighchart({
+      temp = ginicities %>% filter(cidades_semelhantes[1] == cidade |
+                                     cidades_semelhantes[2] == cidade |
+                                     cidades_semelhantes[3] == cidade) %>%
+        mutate("legenda" = cidade) %>%
+        select(cod7, cidade, UF, pop, coef, legenda)
+      
+      
+      info_coef = coef_ref %>% rbind(temp)
+      
+      highchart () %>%
+        hc_add_series_df(data = info_coef, 
+                         type = "bubble", 
+                         x = as.factor(legenda),
+                         y= coef, size = pop) %>%
+        hc_title(text = "Municípios e seus coeficientes") %>%
+        hc_xAxis(type = "category", title = list(text="Municípios")) %>%
+        hc_yAxis(title = list(text="Coeficiente de supercontratação")) %>%
+        hc_legend(enabled = F) %>%
+        hc_tooltip(useHTML = TRUE,
+                   headerFormat = "<table>",
+                   pointFormat = paste("<tr><th>Cidade</th><td>{point.cidade}</td></tr>",
+                                       "<tr><th>Estado</th><td>{point.UF}</td></tr>",
+                                       "<tr><th>Coeficiente</th><td>{point.y}</td></tr>",
+                                       "<tr><th>População</th><td>{point.pop}</td></tr>"),
+                   footerFormat = "</table>")
+    })
+    
     
     cidades_semelhantes_id = (cidadesProximas %>%
                              arrange(dist) %>%

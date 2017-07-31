@@ -212,9 +212,6 @@ server <- function(input, output, session) {
                       choices = ginicities %>%
                         filter(UF == input$selectEstado) %>%
                         select(cidade))
-    
-
-    
   })
   
 
@@ -237,31 +234,9 @@ server <- function(input, output, session) {
   
 
     output$giniInfoCoef00 <- renderHighchart({
-      temp = ginicities %>% filter(cidades_semelhantes[1] == cidade |
-                                     cidades_semelhantes[2] == cidade |
-                                     cidades_semelhantes[3] == cidade) %>%
-        mutate("legenda" = cidade) %>%
-        select(cod7, cidade, UF, pop, coef, legenda)
       
-
-      info_coef = coef_ref %>% rbind(temp)
+      highcharter_coef(ginicities, cidades_semelhantes, coef_ref)
       
-      highchart () %>%
-        hc_add_series_df(data = info_coef, 
-                         type = "bubble", 
-                         x = as.factor(legenda),
-                         y= coef, size = pop) %>%
-        hc_title(text = "Municípios e seus coeficientes") %>%
-        hc_xAxis(type = "category", title = list(text="Municípios")) %>%
-        hc_yAxis(title = list(text="Coeficiente de supercontratação")) %>%
-        hc_legend(enabled = F) %>%
-        hc_tooltip(useHTML = TRUE,
-                   headerFormat = "<table>",
-                   pointFormat = paste("<tr><th>Cidade</th><td>{point.cidade}</td></tr>",
-                                       "<tr><th>Estado</th><td>{point.UF}</td></tr>",
-                                       "<tr><th>Coeficiente</th><td>{point.y}</td></tr>",
-                                       "<tr><th>População</th><td>{point.pop}</td></tr>"),
-                   footerFormat = "</table>")
     })
 
     tabela_resultante = cidade_resumo %>%
@@ -350,31 +325,9 @@ server <- function(input, output, session) {
     
     
     output$giniInfoCoef11 <- renderHighchart({
-      temp = ginicities %>% filter(cidades_semelhantes[1] == cidade |
-                                     cidades_semelhantes[2] == cidade |
-                                     cidades_semelhantes[3] == cidade) %>%
-        mutate("legenda" = cidade) %>%
-        select(cod7, cidade, UF, pop, coef, legenda)
       
+      highcharter_coef(ginicities, cidades_semelhantes, coef_ref)
       
-      info_coef = coef_ref %>% rbind(temp)
-      
-      highchart () %>%
-        hc_add_series_df(data = info_coef, 
-                         type = "bubble", 
-                         x = as.factor(legenda),
-                         y= coef, size = pop) %>%
-        hc_title(text = "Municípios e seus coeficientes") %>%
-        hc_xAxis(type = "category", title = list(text="Municípios")) %>%
-        hc_yAxis(title = list(text="Coeficiente de supercontratação")) %>%
-        hc_legend(enabled = F) %>%
-        hc_tooltip(useHTML = TRUE,
-                   headerFormat = "<table>",
-                   pointFormat = paste("<tr><th>Cidade</th><td>{point.cidade}</td></tr>",
-                                       "<tr><th>Estado</th><td>{point.UF}</td></tr>",
-                                       "<tr><th>Coeficiente</th><td>{point.y}</td></tr>",
-                                       "<tr><th>População</th><td>{point.pop}</td></tr>"),
-                   footerFormat = "</table>")
     })
     
     

@@ -92,7 +92,7 @@ ui <- dashboardPage( skin= "purple",
                     ),
                   fluidRow(
                     box(width = 12,
-                        h3("Cidade Semelhantes"),
+                        h3("Municípios semelhantes"),
                         DT::dataTableOutput("cidadesSemelhantes")
                         )
                     )
@@ -171,7 +171,7 @@ ui <- dashboardPage( skin= "purple",
                   ),
                   fluidRow(
                     box(width = 12,
-                        h3("Cidade Semelhantes"),
+                        h3("Municípios semelhantes"),
                         DT::dataTableOutput("cidadesSemelhantes2")
                     )
                   )
@@ -199,7 +199,24 @@ ui <- dashboardPage( skin= "purple",
                 )
               )
       ),
-      tabItem(tabName = "sobre")
+      tabItem(tabName = "sobre",
+              box(width = 12, title = "Sobre",
+                p("Esta aplicação é resultado de um projeto de pesquisa entitulado de Mineração de dados
+                  para controle social do Congresso Nacional. A pesquisa foi realizada na Universidade Federal de
+                  Campina Grande (UFCG) [1] e Lab Analytics [2] e faz parte do Programa Institucional de Bolsas
+                  de Iniciação Científica (PIBIC). As pessoas envolvidas são Martha Michelly Galvão Menezes, aluna de
+                  graduação no curso de Ciência da Computação, e Nazareno Ferreira de Andrade, professor do Departamento de
+                  Sistemas e Computação e orientador do projeto."),
+                p("O projeto foi realizado com objetivo de, através de análise e visualização de dados, auxiliar no
+                  na investigação e entendimento de como os municípios estão atuando no processo de contratação de
+                  empresas e distribuição de verbas entre os convênios existentes. É possível realizar comparações 
+                  municípios de porte semelhantes e observar se há concentração de verba em uma só empresa fornecedora
+                  de serviços/produtos. Este pode ser considerado um pontapé inicial para a percepção de anomalias,
+                  incentivando a busca de razões/respostas a respeito de comportamentos suspeitos."),
+                p("[1] www.ufcg.edu.br"),
+                p("[2] http://analytics.ufcg.edu.br")
+              )
+            )
     )
   )
 )
@@ -559,7 +576,7 @@ server <- function(input, output, session) {
   })
   
   output$box_13 <- renderValueBox({
-    box_navegador(3, "<b>Mais detalhes</b>", "yellow", "button_box_13", "group", 4)
+    box_navegador(3, "<b>Mais detalhes</b>", "yellow", "button_box_13", "table", 4)
   })
   
 }

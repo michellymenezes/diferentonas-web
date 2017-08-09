@@ -62,9 +62,9 @@ highcharter_convenios = function(pagamentos_siconv, cidade, estado){
 
 highcharter_coef = function(ginicities, cidades_semelhantes, coef_ref){
   
-  temp = ginicities %>% filter(cidades_semelhantes[1] == cidade |
-                                 cidades_semelhantes[2] == cidade |
-                                 cidades_semelhantes[3] == cidade) %>%
+  temp = ginicities %>% filter(cidades_semelhantes[1] == cod7 |
+                                 cidades_semelhantes[2] == cod7 |
+                                 cidades_semelhantes[3] == cod7) %>%
     mutate("legenda" = cidade) %>%
     select(cod7, cidade, UF, pop, coef, legenda)
   

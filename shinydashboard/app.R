@@ -8,6 +8,13 @@ library(DT)
 library(highcharter)
 options(scipen=999)
 
+# source("shinydashboard/module_functions.R")
+# ginicities = read_csv("shinydashboard/data/ginicities_5_new.csv")
+# pagamentos_siconv = read_csv("shinydashboard/data/pagamentos_sincov.csv")
+# cidade_resumo = read_csv("shinydashboard/data/cidade_resumo_5.csv")
+# cidade_convenio = read_csv("shinydashboard/data/cidade_convenio_5.csv")
+
+
 source("module_functions.R")
 
 ginicities = read_csv("data/ginicities_5_new.csv")
@@ -28,6 +35,7 @@ ui <- dashboardPage( skin= "purple",
     sidebarMenu(id = "myMenu",
                 menuItem("Introdução", tabName = "info", icon = icon("magic")),
                 menuItem("Sua cidade", tabName = "user", icon = icon("bar-chart-o")),
+                menuItem("Notas", tabName = "nota", icon = icon("bar-chart-o")),
                 menuItem("Sobre", tabName = "sobre", icon = icon("info-circle"))),
     conditionalPanel(condition = "input.myMenu == 'user' && input.panel2 == 1",
                      selectInput("selectEstado", "Estado:", choices = unique(ginicities %>%
@@ -199,6 +207,12 @@ ui <- dashboardPage( skin= "purple",
                 )
               )
       ),
+      tabItem(tabName = "nota",
+              box(width = 12, title = "Notas",
+                  p(""),
+                  p("")
+                  )
+                ),
       tabItem(tabName = "sobre",
               box(width = 12, title = "Sobre",
                 p("Esta aplicação é resultado de um projeto de pesquisa entitulado de Mineração de dados
@@ -248,11 +262,13 @@ server <- function(input, output, session) {
     cidades_semelhantes = (cidadesProximas %>%
                              arrange(dist) %>%
                              slice(1:3))$MUNIC_PROPONENTE
-  
+    cidades_semelhantes_cod = (cidadesProximas %>%
+                             arrange(dist) %>%
+                             slice(1:3))$cod7
 
     output$giniInfoCoef00 <- renderHighchart({
       
-      highcharter_coef(ginicities, cidades_semelhantes, coef_ref)
+      highcharter_coef(ginicities, cidades_semelhantes_cod, coef_ref)
       
     })
 
@@ -340,10 +356,14 @@ server <- function(input, output, session) {
                              arrange(dist) %>%
                              slice(1:3))$MUNIC_PROPONENTE
     
+    cidades_semelhantes_cod = (cidadesProximas %>%
+                             arrange(dist) %>%
+                             slice(1:3))$cod7
+    
     
     output$giniInfoCoef11 <- renderHighchart({
       
-      highcharter_coef(ginicities, cidades_semelhantes, coef_ref)
+      highcharter_coef(ginicities, cidades_semelhantes_cod, coef_ref)
       
     })
     

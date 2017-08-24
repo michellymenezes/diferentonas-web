@@ -2,8 +2,6 @@
 library(shinydashboard)
 library(readr)
 library(dplyr)
-library(plotly)
-library(crosstalk)
 library(DT)
 library(highcharter)
 options(scipen=999)
@@ -14,11 +12,10 @@ options(scipen=999)
 # cidade_resumo = read_csv("shinydashboard/data/cidade_resumo_5.csv")
 # cidade_convenio = read_csv("shinydashboard/data/cidade_convenio_5.csv")
 
-
 source("module_functions.R")
 
 ginicities = read_csv("data/ginicities_5_new.csv")
-pagamentos_siconv = read_csv("data/pagamentos_sincov.csv")
+pagamentos_siconv = read_csv("https://www.dropbox.com/s/hqmigwbnq9zyd0q/pagamentos_sincov.csv?raw=1")
 cidade_resumo = read_csv("data/cidade_resumo_5.csv")
 cidade_convenio = read_csv("data/cidade_convenio_5.csv")
 coef_ref = data_frame("cod7" = c("3127909", "2916401", "4322343"),
